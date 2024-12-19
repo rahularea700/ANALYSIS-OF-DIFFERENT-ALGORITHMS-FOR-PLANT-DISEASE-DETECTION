@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Disease Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: url('/1.jpg') no-repeat center center fixed;
+            background-size: cover;
+            background-image: url("/1.jpg");
+            justify-content: center;
+            align-items: center;
+        }
+        h1 {
+            color: #fff;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            background-color: rgba(34, 139, 34, 0.8); /* Semi-transparent background */
+            padding: 20px;
+            border-radius: 15px;
+            border: 3px solid #196619;
+            display: inline-block;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .form-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            max-width: 800px;
+            margin: auto;
+            flex-direction: column; /* Ensures vertical stacking */
+        }
+        .form-container > * {
+            margin: 10px;
+            flex: 1;
+            min-width: 150px;
+            max-width: 100%; /* Ensure it does not overflow the container */
+        }
+        input[type="file"], select, button {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 1em;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        select {
+            cursor: pointer;
+        }
+        select:hover {
+            background-color: #e0e0e0; /* Light grey background on hover */
+        }
+        button {
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-top: 0;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1.5em;
+            color: #333;
+        }
+        #imagePreview {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Plant Disease Detection</h1>
+    <h2>
+    <form id="uploadForm" class="form-container" method="POST" action="/predict" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" required>
+        <label for="model">Select Model:</label>
+        <select name="model" id="model" required>
+            <option value="resnet">ResNet-50</option>
+            <option value="cnn">CNN</option>
+            <option value="pinn">PINN</option>
+        </select>
+        <button type="submit">Predict</button>
+        <img id="imagePreview" src="#" alt="Image Preview">
+    </form></h2>
+    <div id="result"></div>
+    <script>
+        // Function to show image preview
+        document.querySelector('input[type="file"]').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('imagePreview');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Function to handle form submission
+        document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            const resultDiv = document.getElementById('result');
+            if (result.error) {
+                resultDiv.innerText = 'Error: ' + result.error;
+                resultDiv.style.color = '#ff0000'; // Red color for errors
+            } else {
+                resultDiv.innerText = 'Predicted Label: ' + result.predicted_label;
+                resultDiv.style.color = '#228b22'; // Green color for predictions
+            }
+        });
+    </script>
+</body>
+</html>
